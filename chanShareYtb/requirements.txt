@@ -1,0 +1,11 @@
+Django==4.1.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2 # Token JWT
+django-filter==22.1 # Filtering support
+Markdown==3.4.1 # Markdown support for the browsable API.
+# we use sqlite db for dev
+# we use postgresql for prod
+# psycopg2-binary==2.9.4
+django3-livesync==1 # DEBUG
+django-extensions==3.2.1 # DEBUG
+tzdata==2022.4 # FOR ADMIN
