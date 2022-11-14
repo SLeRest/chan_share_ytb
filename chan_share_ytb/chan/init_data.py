@@ -1,6 +1,11 @@
 from chan.models import Song
-from django.db import models
+from pathlib import Path
+from PIL import Image
+from django.core.files import File
+import requests
+import sys
 import youtube_dl
+import shutil
 from datetime import datetime, timedelta
 
 # CMD
@@ -21,7 +26,7 @@ print(f'channel_id: {video_info["channel_id"]}')
 print(f'channel_url: {video_info["channel_url"]}')
 print(f'channel_title: {video_info["channel"]}')
 print(f'uploader_id: {video_info["uploader_id"]}')
-print(f'uploader: {video_info["uploader"]}')
+print(f'uploader_name: {video_info["uploader"]}')
 duration = timedelta(seconds=video_info["duration"])
 print(f'duration: {duration}')
 print(f'tags: {video_info["tags"]}')
@@ -37,11 +42,35 @@ s.channel_id = video_info["channel_id"]
 s.channel_url = video_info["channel_url"]
 s.channel_title = video_info["channel"]
 s.uploader_id = video_info["uploader_id"]
-s.uploader = video_info["uploader_name"]
+s.uploader_name = video_info["uploader"]
 s.duration = timedelta(seconds=video_info["duration"])
-s.tags = video_info["tags"] # TODO a revoir apres avoir capter comment fonctionne taggit
- # TODO download image via l'url > voir comment on ajoute ? on met un f = open() ?
-s.thumbnais = video_info["thumbnail"]
 s.description = video_info["description"]
 s.upload_date = datetime.strptime(video_info["upload_date"], '%Y%m%d').date()
-s.save()
+for tag in video_info["tags"]:
+    s.tags.add(tag) # TODO a revoir apres avoir capter comment fonctionne taggit
+
+# Download file
+r = requests.get(video_info['thumbnail'], stream = True)
+if r.status_code == 200:
+    p = f'/home/ouralgan/chan_share_ytb/chan_share_ytb/data_songs/{video_info["id"]}.webp'
+    with open(p, 'wb') as f:
+        shutil.copyfileobj(r.raw, f)
+    print("Image downloaded")
+else:
+    print(f'Failed download: {r.status_code}')
+    print(r.text)
+    sys.exit(1)
+# Convert webp file to png file
+try:
+    with Image.open(p).convert("RGB") as im:
+        p = f'/home/ouralgan/chan_share_ytb/chan_share_ytb/data_songs/{video_info["id"]}.png'
+        im.save(p, "png")
+    print(f'Image converted to png: {p}')
+except Exception as e:
+    print(f'Error convert webp to png: {str(e)}')
+    sys.exit(2)
+# Add image to BDD
+path = Path(p)
+with path.open(mode='rb') as f:
+    s.thumbnail = File(f, name=path.name)
+    s.save()

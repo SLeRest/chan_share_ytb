@@ -32,9 +32,10 @@ class Song(Base):
         NOT_STARTED = 'NS', _('Not Started')
 
     id_ytb = models.CharField(max_length=255, null=True, default=None)
+    url_ytb = models.URLField(max_length=200, null=True, default=None)
     title = models.CharField(max_length=255, null=True, default=None)
     channel_id = models.CharField(max_length=255, null=True, default=None)
-    channel_url = models.CharField(max_length=255, null=True, default=None)
+    channel_url = models.URLField(max_length=200, null=True, default=None)
     channel_title = models.CharField(max_length=255, null=True, default=None)
     uploader_id = models.CharField(max_length=255, null=True, default=None)
     uploader_name = models.CharField(max_length=255, null=True, default=None)
