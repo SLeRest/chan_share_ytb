@@ -1,10 +1,13 @@
 from django.contrib.auth.models import User
 
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.exceptions import APIException
+from rest_framework.response import Response
 
 from chan.models import Song 
 from chan.permissions import SongPermission
 from chan.serializers import SongSerializer, SongCreateSerializer
+from chan.utils import download_ytb_mp3
 # Create your views here.
 
 # TODO faire une url "all" pour l'admin pour request tout les son
@@ -31,6 +34,26 @@ class SongViewset(ModelViewSet):
         if self.action == "create":
             return SongCreateSerializer # TODO
         return super().get_serializer_class()
+
+    # TODO
+    # faire une reponse avant la fin du download en disant que c'est dans la queue
+    # on peut faire une request sur un endpoint status pour voir comment ca se passe
+    def create(self, request):
+        s = Song(request['url_ytb'])
+        try:
+            download_ytb_mp3(s.url_ytb, id)
+        except Exception as e:
+            msg = f'Error download: {str(e)}'
+            raise APIException(status_code=500, default_detail=msg)
+        return Response()
+
+    # @action(detail=True, methods=['post'])
+    # def download(self, request, id):
+    #
+    # @action(detail=True, methods=['get'])
+    # def status(self, request, id):
+    #     s = Song.objects.get(id=id)
+    #     return Response(s.download_status)
 
 # class UserViewSet(viewsets.ModelViewSet):
 #     """

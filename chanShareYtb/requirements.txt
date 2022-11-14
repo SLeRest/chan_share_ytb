@@ -3,9 +3,12 @@ djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2 # Token JWT
 django-filter==22.1 # Filtering support
 Markdown==3.4.1 # Markdown support for the browsable API.
+django-taggit==3.0.0 # For tag
+Pillow==9.3.0 # For ImageField
 # we use sqlite db for dev
 # we use postgresql for prod
 # psycopg2-binary==2.9.4
 django3-livesync==1 # DEBUG
 django-extensions==3.2.1 # DEBUG
 tzdata==2022.4 # FOR ADMIN
+youtube_dl==2021.12.17 # EN COUR DE TEST

@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, ValidationError
+from taggit.serializers import TaggitSerializer, TagListSerializerField
 
 from chan import models
 
@@ -11,12 +12,25 @@ class BaseSerializer(ModelSerializer):
             for field_name in remove_fields:
                 self.fields.pop(field_name)
 
-class SongSerializer(BaseSerializer):
+class SongSerializer(TaggitSerializer, BaseSerializer):
+    tags = TagListSerializerField()
 
     class Meta:
         models.Song
-        fields = ['id', 'title', 'title_ytb', 'channel_ytb', 'url_ytb', 'date'
-                   'created', 'updated']
+        fields = [  'id_ytb',
+                    'title',
+                    'channel_id',
+                    'channel_url',
+                    'channel_title',
+                    'uploader_id',
+                    'uploader_name',
+                    'duration',
+                    'thumbnail',
+                    'description',
+                    'upload_date_ytb',
+                    'download_datetime',
+                    'download_error',
+                    'download_status']
 
 class SongCreateSerializer(ModelSerializer):
 

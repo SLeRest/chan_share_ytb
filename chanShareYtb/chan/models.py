@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from taggit.managers import TaggableManager
 
 class Base(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -18,20 +20,32 @@ class Playlist(Base):
         ordering = ('created', )
         db_table = 'playlist'
 
+# TODO faire un model de log de changement de status sur Song
 class Song(Base):
 
     class DownloadStatus(models.TextChoices):
+        DONE = 'DN', _('Done')
         DOWNLOAD = 'DL', _('Download')
         IN_QUEUE = 'IQ', _('In queue')
         FAILED = 'FL', _('Failed')
         SUSPEND = 'SP', _('Suspend')
         NOT_STARTED = 'NS', _('Not Started')
 
+    id_ytb = models.CharField(max_length=255, null=True, default=None)
     title = models.CharField(max_length=255, null=True, default=None)
-    title_ytb = models.CharField(max_length=255, null=True, default=None)
-    channel_ytb = models.CharField(max_length=255, null=True, default=None)
-    url_ytb = models.URLField()
-    date = models.DateField(null=True, default=None)
+    channel_id = models.CharField(max_length=255, null=True, default=None)
+    channel_url = models.CharField(max_length=255, null=True, default=None)
+    channel_title = models.CharField(max_length=255, null=True, default=None)
+    uploader_id = models.CharField(max_length=255, null=True, default=None)
+    uploader_name = models.CharField(max_length=255, null=True, default=None)
+    duration = models.DurationField(null=True, default=None)
+    tags = TaggableManager() # TODO type tag, voir la lib taggit et son fonctionnement
+     # TODO type image, voir si on met une height et width fixe, il faut avoir la lib pillow askip
+    thumbnail = models.ImageField(upload_to=settings.PATH_SONGS_DATA)
+    description = models.TextField()
+    upload_date_ytb = models.DateField(null=True, default=None) # Date de l'upload sur youtube
+    download_datetime = models.DateField(null=True, default=None)
+    download_error = models.TextField()
     download_status = models.CharField(
         max_length=2,
         choices=DownloadStatus.choices,

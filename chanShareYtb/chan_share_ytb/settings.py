@@ -15,6 +15,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+PATH_SONGS_DATA = f'./data_songs'
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'taggit',
     'rest_framework',
     # 'django.contrib.staticfiles', # DEBUG MAYBE restart django when file change
     # 'livesync', # DEBUG restart django when file change
@@ -55,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'chanShareYtb.urls'
+ROOT_URLCONF = 'chan_share_ytb.urls'
 
 TEMPLATES = [
     {
@@ -73,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'chanShareYtb.wsgi.application'
+WSGI_APPLICATION = 'chan_share_ytb.wsgi.application'
 
 
 # Database
