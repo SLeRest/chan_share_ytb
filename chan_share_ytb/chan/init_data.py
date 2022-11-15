@@ -2,6 +2,7 @@ from chan.models import Song
 from pathlib import Path
 from PIL import Image
 from django.core.files import File
+from django.db.utils import IntegrityError
 import requests
 import sys
 import youtube_dl
@@ -15,8 +16,13 @@ from datetime import datetime, timedelta
 url = 'https://www.youtube.com/watch?v=dFzJ4UPNL1w'
 
 # On ajoute song dans la BDD avec le status (par default) not started
-s = Song(url_ytb=url)
-s.save()
+try:
+    s = Song(url_ytb=url)
+    s.save()
+except IntegrityError:
+    # La song est deja presente
+    print("Song already here")
+    sys.exit(0)
 
 # On test le download
 video_info = youtube_dl.YoutubeDL().extract_info(url=url, download=False)
