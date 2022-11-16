@@ -1,11 +1,16 @@
 import sys
 import logging
 import requests
+import shutil
 from pathlib import Path
+from datetime import timedelta, datetime
+
+from PIL import Image
 
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from django.conf import settings
+from django.core.files import File
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import APIException
@@ -52,7 +57,8 @@ class SongViewset(ModelViewSet):
     # faudrait une table dans la bdd pour les logs error
     def create(self, request):
         # Check si le son est deja present dans la BDD
-        song = Song.objects.filter(url_ytb=request.data["url_ytb"])
+        url_ytb = request.data["url_ytb"]
+        song = Song.objects.filter(url_ytb=url_ytb)
         if song.count() > 0:
             # Le son est present
             serializer = SongSerializer(song.first())
@@ -64,12 +70,12 @@ class SongViewset(ModelViewSet):
 
         # On test le download
         try:
-            video_info = youtube_dl.YoutubeDL().extract_info(url=url, download=False)
+            video_info = youtube_dl.YoutubeDL().extract_info(url=url_ytb, download=False)
             print("Video data Ok")
         except Exception as e:
             # TODO raise des exception specifique
             # pas uniquement 404, youtube peut etre down par exemple
-            raise APIException(status_code='404', detail=str(e))
+            raise APIException(str(e))
 
         song.id_ytb = video_info["id"]
         song.title = video_info["title"]
@@ -81,7 +87,7 @@ class SongViewset(ModelViewSet):
         song.duration = timedelta(seconds=video_info["duration"])
         song.description = video_info["description"]
         song.upload_date = datetime.strptime(video_info["upload_date"], '%Y%m%d').date()
-        for tag in video_info["tags"] : s.tags.add(tag) 
+        for tag in video_info["tags"] : song.tags.add(tag) 
 
         # Download thumbnail and put it in songs_data dir
         r = requests.get(video_info['thumbnail'], stream = True)
@@ -92,7 +98,7 @@ class SongViewset(ModelViewSet):
             print("Image downloaded")
         else:
             print(f'Failed download: {r.status_code}: {r.text}')
-            raise APIException(status_code='500', detail=r.text)
+            raise APIException(r.text)
 
         # Convert webp file to png file
         try:
@@ -102,13 +108,12 @@ class SongViewset(ModelViewSet):
             print(f'Image converted to png: {p}')
         except Exception as e:
             print(f'Error convert webp to png: {str(e)}')
-            raise APIException(status_code='500', detail=r.text)
+            raise APIException(r.text)
 
         # Add image to BDD
-        p = Path(p)
-        with path.open(mode='rb') as f:
-            s.thumbnail = File(f, name=p.name)
-            s.save()
+        with Path(p).open(mode='rb') as f:
+            song.thumbnail = File(f, name=Path(p).name)
+            song.save()
         serializer = SongSerializer(song)
         return Response(serializer.data)
 

@@ -39,9 +39,21 @@ class TestSong:
 
     def test_create_download_delete(self):
         # CREATE
+        token = self.get_token()
         url = "http://127.0.0.1:8000/chan-share-ytb/api/0.0/songs/"
         b = {'url_ytb':'https://www.youtube.com/watch?v=algNQYMP8Qs'}
         h = {'Authorization':f'Bearer {token}'}
         r = requests.post(url, data=b, headers=h)
         id = r.json()['id']
         assert r.status_code == 201
+
+    def test_delete(self):
+        token = self.get_token()
+        url = "http://127.0.0.1:8000/chan-share-ytb/api/0.0/songs/"
+        h = {'Authorization':f'Bearer {token}'}
+        r = requests.get(url, headers=h)
+        assert r.status_code == 200
+        for song in r.json()['results']:
+            url = f"http://127.0.0.1:8000/chan-share-ytb/api/0.0/songs/{song['id']}"
+            r = requests.delete(url, headers=h)
+            assert r.status_code == 204
