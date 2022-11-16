@@ -1,4 +1,11 @@
+import sys
+import logging
+import requests
+from pathlib import Path
+
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
+from django.conf import settings
 
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.exceptions import APIException
@@ -8,6 +15,8 @@ from chan.models import Song
 from chan.permissions import SongPermission
 from chan.serializers import SongSerializer, SongCreateSerializer
 from chan.utils import download_ytb_mp3
+
+import youtube_dl
 # Create your views here.
 
 # TODO faire une url "all" pour l'admin pour request tout les son
@@ -35,17 +44,73 @@ class SongViewset(ModelViewSet):
             return SongCreateSerializer # TODO
         return super().get_serializer_class()
 
-    # TODO
+    # TODO NEXT VERSION
     # faire une reponse avant la fin du download en disant que c'est dans la queue
     # on peut faire une request sur un endpoint status pour voir comment ca se passe
+    # TODO
+    # la on fait des print pour chaque erreur car on est en dev mode mais
+    # faudrait une table dans la bdd pour les logs error
     def create(self, request):
-        s = Song(request['url_ytb'])
+        # Check si le son est deja present dans la BDD
+        song = Song.objects.filter(url_ytb=request.data["url_ytb"])
+        if song.count() > 0:
+            # Le son est present
+            serializer = SongSerializer(song.first())
+            return Response(serializer.data)
+        # si il n'est pas present on va l'ajouter
+        song = Song(url_ytb=request.data["url_ytb"])
+        song.save()
+        print(f'Song saved: {song.title}')
+
+        # On test le download
         try:
-            download_ytb_mp3(s.url_ytb, id)
+            video_info = youtube_dl.YoutubeDL().extract_info(url=url, download=False)
+            print("Video data Ok")
         except Exception as e:
-            msg = f'Error download: {str(e)}'
-            raise APIException(status_code=500, default_detail=msg)
-        return Response()
+            # TODO raise des exception specifique
+            # pas uniquement 404, youtube peut etre down par exemple
+            raise APIException(status_code='404', detail=str(e))
+
+        song.id_ytb = video_info["id"]
+        song.title = video_info["title"]
+        song.channel_id = video_info["channel_id"]
+        song.channel_url = video_info["channel_url"]
+        song.channel_title = video_info["channel"]
+        song.uploader_id = video_info["uploader_id"]
+        song.uploader_name = video_info["uploader"]
+        song.duration = timedelta(seconds=video_info["duration"])
+        song.description = video_info["description"]
+        song.upload_date = datetime.strptime(video_info["upload_date"], '%Y%m%d').date()
+        for tag in video_info["tags"] : s.tags.add(tag) 
+
+        # Download thumbnail and put it in songs_data dir
+        r = requests.get(video_info['thumbnail'], stream = True)
+        if r.status_code == 200:
+            p = f'{settings.DATA_SONG_PATH}/{video_info["id"]}.webp'
+            with open(p, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+            print("Image downloaded")
+        else:
+            print(f'Failed download: {r.status_code}: {r.text}')
+            raise APIException(status_code='500', detail=r.text)
+
+        # Convert webp file to png file
+        try:
+            with Image.open(p).convert("RGB") as im:
+                p = f'{settings.DATA_SONG_PATH}/{video_info["id"]}.png'
+            im.save(p, "png")
+            print(f'Image converted to png: {p}')
+        except Exception as e:
+            print(f'Error convert webp to png: {str(e)}')
+            raise APIException(status_code='500', detail=r.text)
+
+        # Add image to BDD
+        p = Path(p)
+        with path.open(mode='rb') as f:
+            s.thumbnail = File(f, name=p.name)
+            s.save()
+        serializer = SongSerializer(song)
+        return Response(serializer.data)
 
     # @action(detail=True, methods=['post'])
     # def download(self, request, id):

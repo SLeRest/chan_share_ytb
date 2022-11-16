@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, ValidationError
 from taggit.serializers import TaggitSerializer, TagListSerializerField
+from chan.models import Song
 
 from chan import models
 
@@ -16,15 +17,18 @@ class SongSerializer(TaggitSerializer, BaseSerializer):
     tags = TagListSerializerField()
 
     class Meta:
-        models.Song
-        fields = [  'id_ytb',
+        model = Song
+        fields = [  'id',
+                    'id_ytb',
                     'title',
+                    'url_ytb',
                     'channel_id',
                     'channel_url',
                     'channel_title',
                     'uploader_id',
                     'uploader_name',
                     'duration',
+                    'tags',
                     'thumbnail',
                     'description',
                     'upload_date_ytb',
@@ -35,7 +39,7 @@ class SongSerializer(TaggitSerializer, BaseSerializer):
 class SongCreateSerializer(ModelSerializer):
 
     class Meta:
-        models.Song
+        model = Song
         fields = ['url_ytb']
 
     # TODO make youtube valid url check by trying to download
