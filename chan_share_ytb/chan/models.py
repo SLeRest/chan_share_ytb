@@ -42,11 +42,12 @@ class Song(Base):
     duration = models.DurationField(null=True, default=None)
     tags = TaggableManager() # TODO type tag, voir la lib taggit et son fonctionnement
      # TODO type image, voir si on met une height et width fixe, il faut avoir la lib pillow askip
-    thumbnail = models.ImageField(upload_to=settings.DATA_THUMBNAIL_PATH)
+    thumbnail = models.ImageField(upload_to=settings.DATA_THUMBNAILS_PATH)
     description = models.TextField()
     upload_date_ytb = models.DateField(null=True, default=None) # Date de l'upload sur youtube
     download_datetime = models.DateField(null=True, default=None)
     download_error = models.TextField()
+    #song = FileField(upload_to=settings.DATA_SONG_PATH, storage=None, max_length=100, **options)
     download_status = models.CharField(
         max_length=2,
         choices=DownloadStatus.choices,

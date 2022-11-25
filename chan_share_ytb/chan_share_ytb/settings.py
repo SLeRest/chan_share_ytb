@@ -16,9 +16,8 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_SONG_PATH = f'{os.getcwd()}/songs_data'
-DATA_THUMBNAIL_PATH = 'thumbnail'
-# DATA_SONG_PATH = '/home/ouralgan/chan_share_ytb/chan_share_ytb/data_songs/'
+DATA_SONGS_PATH = f'songs'
+DATA_THUMBNAILS_PATH = 'thumbnails'
 
 
 # Quick-start development settings - unsuitable for production

@@ -11,4 +11,5 @@ Pillow==9.3.0 # For ImageField
 django3-livesync==1 # DEBUG
 django-extensions==3.2.1 # DEBUG
 tzdata==2022.4 # FOR ADMIN
-youtube_dl==2021.12.17 # EN COUR DE TEST
+yt-dlp==2022.11.11
+pytube==12.1.0
