@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from taggit.managers import TaggableManager
@@ -11,10 +11,30 @@ class Base(models.Model):
     class Meta:
         abstract = True
 
-
+# TODO
+# reflechir aux liens entre playlist et user sur les droits
 class Playlist(Base):
+
+    class RightMode(models.TextChoices):
+        PUBLIC = 'PB', _('Public')
+        FRIEND = 'FR', _('Friend')
+        GROUP = 'GR', _('Group')
+        PERSONNAL = 'PN', _('Personnal')
+        PRIVATE = 'PV', _('Private')
+
     title = models.CharField(max_length=255)
-    mode = models.CharField(max_length=20) # TODO enum
+    mode = models.CharField(
+        max_length=2,
+        choices=RightMode.choices,
+        default=RightMode.PUBLIC
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(
+            Group,
+            on_delete=models.SET_NULL,
+            null=True,
+            default=None
+    )
 
     class Meta:
         ordering = ('created', )

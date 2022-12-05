@@ -1,17 +1,7 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, ValidationError
+from rest_framework.serializers import ModelSerializer
 from taggit.serializers import TaggitSerializer, TagListSerializerField
 from chan.models import Song
-
-from chan import models
-
-class BaseSerializer(ModelSerializer):
-
-    def __init__(self, *args, **kwargs):
-        remove_fields = kwargs.pop('remove_fields', None)
-        super(BaseSerializer, self).__init__(*args, **kwargs)
-        if remove_fields:
-            for field_name in remove_fields:
-                self.fields.pop(field_name)
+from chan.serializers.base import BaseSerializer
 
 class SongSerializer(TaggitSerializer, BaseSerializer):
     tags = TagListSerializerField()
@@ -34,7 +24,9 @@ class SongSerializer(TaggitSerializer, BaseSerializer):
                     'upload_date_ytb',
                     'download_datetime',
                     'download_error',
-                    'download_status']
+                    'download_status',
+                    'created',
+                    'updated']
 
 class SongCreateSerializer(ModelSerializer):
 

@@ -76,6 +76,7 @@ def create_song_from_video_info(song, video_info):
     song.upload_date = datetime.strptime(video_info["upload_date"], '%Y%m%d').date()
     for tag in video_info["tags"] : song.tags.add(tag) 
     song = get_thumnnail_png(song, video_info)
+    # TODO send to the queue
     #song = get_song_mp3(song, video_info)
     song.save()
     return song

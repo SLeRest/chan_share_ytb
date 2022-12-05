@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 
 from chan.models import Song 
 #from chan.permissions import SongPermission
-from chan.serializers import SongSerializer, SongCreateSerializer
+from chan.serializers.songs import SongSerializer, SongCreateSerializer
 from chan.utils import create_song_from_video_info, download_ytb_mp3
 
 # Create your views here.
@@ -84,9 +84,11 @@ class SongViewset(ModelViewSet):
         serializer = SongSerializer(song)
         return Response(serializer.data, status=201)
 
-    # donc django est un framwork de merde, on vweut delete une row avec une image dedans
-    # eeeeet ca delete pas l'image, donc nicquel a quoi tu sers django
-    # fastapi best
+    # donc django est un framework de m****, si on delete une row avec une image dedans
+    # eeeeet baaaaah ca delete pas l'image (why ...)
+    # Obliger de le faire a la mano ducoup
+    # fastapi / SQLAlchemy BEST
+    # test
     def destroy(self, request, *args, **kwargs):
         # Delete song in BDD
         try:
