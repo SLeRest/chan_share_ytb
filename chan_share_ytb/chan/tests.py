@@ -64,29 +64,44 @@ class TestPlaylist:
         url = 'http://127.0.0.1:8000/chan-share-ytb/api/0.0/token/'
         body = {'username':'admin','password':'admin'}
         r = requests.post(url, data=body)
-        print(r.json())
         return r.json()['access']
 
-    def test_list(self):
+    def test_crud(self):
         token = self.get_token()
         # LIST
         url = "http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/"
         h = {'Authorization':f'Bearer {token}'}
         r = requests.get(url, headers=h)
-        print(r.status_code)
-        print(r.json())
         assert r.status_code == 200
 
-    def test_create(self):
-        token = self.get_token()
-        # LIST
+        # CREATE
         url = "http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/"
         b = {'title':'mytitle', 'user':1}
         h = {'Authorization':f'Bearer {token}'}
         r = requests.post(url, data=b, headers=h)
-        print(r.status_code)
-        print(r.json())
+        id = r.json()['id']
         assert r.status_code == 201
+
+        # RETREIVE
+        url = f'http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/{id}/'
+        r = requests.get(url, headers=h)
+        assert r.status_code == 200
+
+        # PATCH
+        url = f'http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/{id}/'
+        b = {'title':'othertitle'}
+        r = requests.patch(url, data=b, headers=h)
+
+        # RETREIVE
+        url = f'http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/{id}/'
+        r = requests.get(url, headers=h)
+        assert r.json()['title'] == 'othertitle'
+        assert r.status_code == 200
+
+        # DELETE
+        url = f'http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/{id}/'
+        r = requests.delete(url, headers=h)
+        assert r.status_code == 204
 
 class TestUser:
 
