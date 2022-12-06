@@ -9,6 +9,7 @@ class PlaylistSerializer(BaseSerializer):
         fields = [  'id',
                     'title',
                     'mode',
+                    'user',
                     'created',
                     'updated']
 
@@ -16,10 +17,12 @@ class PlaylistCreateSerializer(ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ['title', 'mode']
+        fields = ['title', 'user']
 
     def __init__(self, *args, **kwargs):
-        if 'mode' in kwargs.keys(): # add logic here for optional viewing
-            self.Meta.fields = list(self.Meta.fields)
+        self.Meta.fields = list(self.Meta.fields)
+        if 'mode' in kwargs.keys():
             self.Meta.fields.append(kwargs['mode'])
+        if 'group' in kwargs.keys():
+            self.Meta.fields.append(kwargs['group'])
         super(PlaylistCreateSerializer, self).__init__(*args, **kwargs)

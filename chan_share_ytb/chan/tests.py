@@ -64,6 +64,7 @@ class TestPlaylist:
         url = 'http://127.0.0.1:8000/chan-share-ytb/api/0.0/token/'
         body = {'username':'admin','password':'admin'}
         r = requests.post(url, data=body)
+        print(r.json())
         return r.json()['access']
 
     def test_list(self):
@@ -80,7 +81,7 @@ class TestPlaylist:
         token = self.get_token()
         # LIST
         url = "http://127.0.0.1:8000/chan-share-ytb/api/0.0/playlists/"
-        b = {'title':'mytitle', 'mode': 'PB'}
+        b = {'title':'mytitle', 'user':1}
         h = {'Authorization':f'Bearer {token}'}
         r = requests.post(url, data=b, headers=h)
         print(r.status_code)
